@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">RxKotlinExceptionOperatoritionTest</string>
+
+    <string-array name="items">
+        <item>使用Single时，如果直接在onSuccess中抛出异常，不会回调onError，而是会崩溃。联想到success和error的单选规则就可以知道这样是必然的，既然已经回调了onSuccess，single就不会再捕获「检查异常」了。</item>
+        <item>使用Observable或Flowable时，如果直接在onNext中抛出异常会回调onError。</item>
+        <item>如果map中直接返回Exception，该exception会被当作转换结果传递到onNext。</item>
+        <item>如果map中抛出Exception，则会回调onError。那么在使用retrofit访问接口返回码判断的时候，就很推荐这样用！</item>
+        <item>在map中抛出异常，但后面使用了onErrorResumeNext，回调了onError,但是我发现onErrorResumeNext中需要返回跟源操作符一致的操作符，比如我用的single，那么也需要在onErrorResumeNext中返回一个single，不能返回其他。可以理解为专门用作错误处理的map，在一些场景，比如调用接口A失败就改调用B接口，或者用来自动切换环境的时候很有用。</item>
+        <item>在map中抛出异常，但后面使用了onErrorReturn,onErrorReturn在接收到错误的时候把元数据0转换成了2，这一点跟map很相似，他专门用作错误处理，可以理解为一旦接收到错误就返回一个默认值。</item>
+        <item>在map中抛出异常，但后面使用了onErrorReturnItem(2),其实就是onErrorReturn的简写。</item>
+        <item>当map中抛出异常并回调onError后，可以取消订阅停止发送。</item>
+        <item>当map中抛出异常,经过onErrorResumeNext回调onError后，可以取消订阅停止发送。</item>
+    </string-array>
+</resources>
