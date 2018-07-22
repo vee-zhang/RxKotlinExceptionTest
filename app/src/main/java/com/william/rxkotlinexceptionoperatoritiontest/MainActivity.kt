@@ -4,8 +4,8 @@ import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.widget.ArrayAdapter
-import io.reactivex.Observable
-import io.reactivex.Single
+import io.reactivex.*
+import io.reactivex.disposables.Disposable
 import io.reactivex.functions.Function
 import kotlinx.android.synthetic.main.activity_main.*
 
@@ -33,6 +33,8 @@ class MainActivity : AppCompatActivity() {
                 6 -> test6()
                 7 -> test7()
                 8 -> test8()
+                9 -> test9()
+                10 -> test10()
             }
         }
     }
@@ -199,6 +201,61 @@ class MainActivity : AppCompatActivity() {
                     Log.d("测试", it.toString())
                 }, {
                     Log.e("测试", it.message)
+                })
+    }
+
+    /**
+     * 当使用Single时在onSuccess中调用onError。
+     */
+    private fun test9() {
+        Single.just(0)
+                .subscribe(object : SingleObserver<Int> {
+
+                    private lateinit var d: Disposable
+
+                    override fun onSubscribe(d: Disposable) {
+                        this.d = d
+                    }
+
+                    override fun onSuccess(t: Int) {
+                        onError(Exception("我擦"))
+                    }
+
+                    override fun onError(e: Throwable) {
+
+                        Log.e("测试", e.message)
+                        d.dispose()
+                    }
+
+                })
+    }
+
+    /**
+     * 当使用Observable时在onNext中调用onError。
+     */
+    private fun test10() {
+        Observable.just(0)
+                .subscribe(object : Observer<Int> {
+
+                    private lateinit var d: Disposable
+
+                    override fun onSubscribe(d: Disposable) {
+                        this.d = d
+                    }
+
+                    override fun onNext(t: Int) {
+                        onError(Exception("我擦"))
+                    }
+
+                    override fun onError(e: Throwable) {
+
+                        Log.e("测试", e.message)
+
+                    }
+
+                    override fun onComplete() {
+                        d.dispose()
+                    }
                 })
     }
 }

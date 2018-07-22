@@ -11,5 +11,7 @@
         <item>在map中抛出异常，但后面使用了onErrorReturnItem(2),其实就是onErrorReturn的简写。</item>
         <item>当map中抛出异常并回调onError后，可以取消订阅停止发送。</item>
         <item>当map中抛出异常,经过onErrorResumeNext回调onError后，可以取消订阅停止发送。</item>
+        <item>当使用Single时在onSuccess中调用onError,可以成功调用onError。</item>
+        <item>当使用Observable时在onNext中调用onError,可以成功调用onError。</item>
     </string-array>
 </resources>
