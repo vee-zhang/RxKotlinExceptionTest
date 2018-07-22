@@ -35,6 +35,8 @@ class MainActivity : AppCompatActivity() {
                 8 -> test8()
                 9 -> test9()
                 10 -> test10()
+                11 -> test11()
+                12 -> test12()
             }
         }
     }
@@ -126,10 +128,10 @@ class MainActivity : AppCompatActivity() {
 
     /**
      * 在map中抛出异常，但后面使用了onErrorReturn,onErrorReturn在接收到错误的时候把元数据0转换成了2，
-     * 这一点跟map很相似，他专门用作错误处理，可以理解为一旦接收到错误就返回一个默认值。
+     * 这一点跟map很相似，他专门用作错误处理，可以理解为一旦接收到错误就返回一个默认值传递到onNext方法，然后调用onComplete终止发射。
      */
     private fun test5() {
-        Single.just(0)
+        Observable.range(0, 100)
                 .map {
                     if (it == 0) {
                         throw Exception("我擦")
@@ -143,6 +145,8 @@ class MainActivity : AppCompatActivity() {
                     Log.d("测试", it.toString())
                 }, {
                     Log.e("测试", it.message)
+                }, {
+                    Log.d("测试", "调用onComplete")
                 })
     }
 
@@ -256,6 +260,48 @@ class MainActivity : AppCompatActivity() {
                     override fun onComplete() {
                         d.dispose()
                     }
+                })
+    }
+
+    /**
+     *  onExceptionResumeNext只能捕获exception,而一旦遇到exception就会启用备用的Obervable
+     */
+    private fun test11() {
+        Observable.range(0, 100)
+                .map {
+                    if (it == 0) {
+                        throw Exception("我擦")
+                    }
+                    Log.d("测试","仍在发射${it}")
+                    it * -1
+                }
+                .onExceptionResumeNext(Observable.range(1,99))
+                .subscribe({
+                    Log.d("测试", it.toString())
+                }, {
+                    Log.e("测试", it.message)
+                })
+    }
+
+    /**
+     * 遇错重试，可以用来做轮询
+     */
+    private fun test12() {
+        Observable.range(0, 100)
+                .map {
+                    if (it == 0) {
+                        throw Exception("我擦")
+                    }
+                    Log.d("测试","仍在发射${it}")
+                    it
+                }
+                .retry { t1, t2 ->
+                    t1 != 50
+                }
+                .subscribe({
+                    Log.d("测试", it.toString())
+                }, {
+                    Log.e("测试", it.message)
                 })
     }
 }
